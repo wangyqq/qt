@@ -1,0 +1,83 @@
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--  <title>程序控制台</title>-->
+<!--  <script>-->
+<!--    // 定义点击按钮执行程序-->
+<!--    function runProgram(){-->
+<!--      // 通过Ajax请求后端接口-->
+<!--      var xmlhttp;-->
+<!--      if (window.XMLHttpRequest)-->
+<!--      {// code for IE7+, Firefox, Chrome, Opera, Safari-->
+<!--        xmlhttp=new XMLHttpRequest();-->
+<!--      }-->
+<!--      else-->
+<!--      {// code for IE6, IE5-->
+<!--        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");-->
+<!--      }-->
+<!--      xmlhttp.onreadystatechange=function()-->
+<!--      {-->
+<!--        if (xmlhttp.readyState==4 && xmlhttp.status==200)-->
+<!--        {-->
+<!--          //获取后端控制台返回的结果-->
+<!--          var consoleResult = xmlhttp.responseText;-->
+<!--          // 将控制台结果输出到前端控制台-->
+<!--          document.getElementById("console").innerHTML = consoleResult;-->
+<!--        }-->
+<!--      }-->
+<!--      xmlhttp.open("GET","http://127.0.0.1:5000/runProgram",true);-->
+<!--      xmlhttp.send();-->
+<!--    }-->
+<!--  </script>-->
+<!--</head>-->
+<!--<body>-->
+<!--  <div>-->
+<!--    <button onclick="runProgram()">执行程序</button>-->
+<!--  </div>-->
+<!--  <div>-->
+<!--    <p>控制台输出：</p>-->
+<!--    <div id="console" style="padding: 10px; background-color: #ccc;">-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Backend Console Output</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <form action="/run_program" method="post">-->
+<!--        <input type="submit" value="Run Program">-->
+<!--    </form>-->
+<!--    <pre>-->
+<!--        {{ output | safe }}-->
+<!--    </pre>-->
+<!--</body>-->
+<!--</html>-->
+
+<html>
+    <head>
+        <title>Backend Console</title>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    </head>
+    <body>
+        <h1>Backend Console</h1>
+        <button id='execute'>Execute Program</button>
+        <div id='console-output'></div>
+        <script type="text/javascript">
+            $('#execute').click(function(){
+                $.ajax({
+                    url: '/execute',
+                    type: 'post',
+                    dataType: 'text',
+                    success: function(data){
+                        $('#console-output').html(data);
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

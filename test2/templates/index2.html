@@ -1,0 +1,22 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Backend Console Output</title>
+</head>
+<body>
+    <h1>Backend Console Output</h1>
+    <form action="/backend-endpoint" method="post">
+    <button type="button" onclick="runProgram()">Run Program</button>
+    <div id="console_output"></div>
+    </form>
+    <script>
+        function runProgram(){
+            // Run your program code here.
+            let console_output = document.getElementById('console_output');
+            // Example output
+            console_output.innerHTML += 'This is an example of console output.<br>';
+            console_output.innerHTML += 'Another example of console output.<br>';
+        }
+    </script>
+</body>
+</html>
