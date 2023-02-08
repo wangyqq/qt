@@ -1,0 +1,36 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="14">
+            <item index="0" class="java.lang.String" itemvalue="environs" />
+            <item index="1" class="java.lang.String" itemvalue="selenium" />
+            <item index="2" class="java.lang.String" itemvalue="requests" />
+            <item index="3" class="java.lang.String" itemvalue="MarkupSafe" />
+            <item index="4" class="java.lang.String" itemvalue="loguru" />
+            <item index="5" class="java.lang.String" itemvalue="redis" />
+            <item index="6" class="java.lang.String" itemvalue="supervisor" />
+            <item index="7" class="java.lang.String" itemvalue="Flask" />
+            <item index="8" class="java.lang.String" itemvalue="tornado" />
+            <item index="9" class="java.lang.String" itemvalue="meinheld" />
+            <item index="10" class="java.lang.String" itemvalue="gevent" />
+            <item index="11" class="java.lang.String" itemvalue="itsdangerous" />
+            <item index="12" class="java.lang.String" itemvalue="maxminddb_geolite2" />
+            <item index="13" class="java.lang.String" itemvalue="attrs" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="scrapyseleniumdemo.spiders.book.gerapy_selenium" />
+          <option value="meiduo_mall.meiduo_mall.apps.users.views.view" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
