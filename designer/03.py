@@ -1,36 +1,38 @@
+# -*- coding: utf-8 -*-
 import sys
-
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog
-from PyQt5.QtGui import QPixmap
-
-class Window(QWidget):
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+class picture(QWidget):
     def __init__(self):
-        super().__init__()
+        super(picture, self).__init__()
 
-        self.init_ui()
+        self.resize(600, 400)
+        self.setWindowTitle("label显示图片")
 
-    def init_ui(self):
-        self.setWindowTitle('PyQt5 Image')
+        self.label = QLabel(self)
+        self.label.setText("   显示图片")
+        self.label.setFixedSize(300, 200)
+        self.label.move(160, 160)
 
-        self.image_label = QLabel()
-        self.image_label.setAlignment(Qt.AlignCenter)
+        self.label.setStyleSheet("QLabel{background:white;}"
+                                 "QLabel{color:rgb(300,300,300,120);font-size:10px;font-weight:bold;font-family:宋体;}"
+                                 )
 
-        self.select_button = QPushButton('选择图片')
-        self.select_button.clicked.connect(self.select_image)
+        btn = QPushButton(self)
+        btn.setText("打开图片")
+        btn.move(10, 30)
+        btn.clicked.connect(self.openimage)
+    def openimage(self):
+        imgName, imgType = QFileDialog.getOpenFileName(self, "打开图片", "", "*.jpg;;*.png;;All Files(*)")
+        jpg = QtGui.QPixmap(imgName).scaled(self.label.width(), self.label.height())
+        self.label.setPixmap(jpg)
 
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.image_label)
-        vbox.addWidget(self.select_button)
 
-        self.setLayout(vbox)
-        self.show()
-
-    def select_image(self):
-        fname, _ = QFileDialog.getOpenFileName(self, '选择图片', '', 'Image Files(*.jpg *.png)')
-        self.image_label.setPixmap(QPixmap(fname))
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = Window()
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    my = picture()
+    my.show()
     sys.exit(app.exec_())
+
