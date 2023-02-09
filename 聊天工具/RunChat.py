@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog
 
 
 
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainwindow = QMainWindow()

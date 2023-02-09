@@ -1,48 +1,61 @@
-服务端：
 
+import sys
 import socket
-import base64
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QObject, pyqtSignal
 
-#声明socket类型，同时生成socket连接对象
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+class ImageSender(QObject):
+    signal = pyqtSignal(QPixmap)
 
-#绑定本机IP和任意端口(端口范围： 0-65535)
-s.bind(('127.0.0.1', 9999))
+    def __init__(self):
+        super().__init__()
+        self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.send_socket.connect(('127.0.0.1', 9999))
 
-#开始监听端口
-s.listen(5)
+    def send_image(self, image_path):
+        with open(image_path, 'rb') as image_file:
+            image_data = image_file.read()
+            self.send_socket.sendall(image_data)
+            self.signal.emit(QPixmap(image_path))
 
-while True:
-    #等待客户端连接
-    connection, address = s.accept()
-    #接收客户端发送的数据
-    recv_data = connection.recv(1024)
-    #解码
-    img_data = base64.b64decode(recv_data)
-    #保存图片
-    with open('image.png','wb') as f:
-        f.write(img_data)
-    print('图片接收完成')
-    #关闭连接
-    connection.close()
+class Window(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
 
-客户端：
+    def initUI(self):
+        self.image_label = QLabel()
+        self.image_label.setFixedSize(200, 200)
 
-import socket
-import base64
+        self.browse_button = QPushButton('Browse...')
+        self.browse_button.clicked.connect(self.browseImage)
 
-#声明socket类型，同时生成socket连接对象
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.send_button = QPushButton('Send')
+        self.send_button.clicked.connect(self.sendImage)
 
-#建立连接
-s.connect(('127.0.0.1', 9999))
+        layout = QVBoxLayout()
+        layout.addWidget(self.image_label)
+        layout.addWidget(self.browse_button)
+        layout.addWidget(self.send_button)
+        self.setLayout(layout)
 
-#读取图片文件
-with open('image.png', 'rb') as f:
-    data = f.read()
-    #编码
-    b64_data = base64.b64encode(data)
-    #发送编码后的图片数据
-    s.send(b64_data)
-#关闭连接
-s.close()
+        self.image_sender = ImageSender()
+        self.image_sender.signal.connect(self.showImage)
+
+        self.show()
+
+    def browseImage(self):
+        image_path, _ = QFileDialog.getOpenFileName(self, 'Select Image', '', 'Images (*.png *.jpg *.jpeg)')
+        self.image_label.setPixmap(QPixmap(image_path))
+
+    def sendImage(self):
+        self.image_sender.send_image(self.image_label.pixmap().toImage())
+
+    def showImage(self, image):
+        self.image_label.setPixmap(image)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = Window()
+    sys.exit(app.exec_())

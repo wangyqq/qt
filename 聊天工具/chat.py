@@ -85,8 +85,9 @@ class Ui_MainWindow(object):
 
         self.pushButton_5 = QtWidgets.QPushButton(self.layoutWidget1) # 发送图片
         self.pushButton_5.setObjectName("pushButton_5")
+        self.pushButton.clicked.connect(self.sendimage)
         self.horizontalLayout_2.addWidget(self.pushButton_5)
-        # self.pushButton.clicked.connect(self.sendimage)
+
 
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(490, 70, 291, 191))

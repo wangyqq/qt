@@ -1,92 +1,154 @@
-import sys
+from PyQt5.Qt import *
+from talk import Ui_Form
 import socket
+import sys
 import time
-import struct
-import os
-import threading
-import json
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QListWidget, \
-    QListWidgetItem, QPushButton, QTextEdit, QFileDialog
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import Qt, pyqtSignal
 
-class Chat(QWidget):
-    def __init__(self):
+class Window(QWidget,Ui_Form):
+    def __init__(self, parent=None, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+        self.setupUi(self)
+        ipaddress = Socket_Client.get_ip() #调用类方法进行获取ip
+        self.lineEdit_3.setText(ipaddress)
+        self.radioButton.setChecked(True)
+        self.lineEdit_4.setText("8888")
+        self.pushButton.clicked.connect(self.socket_connect)
+        self.pushButton_2.clicked.connect(self.send_message)
+        self.radioButton.toggled.connect(self.switch_client_server)
+
+    def switch_client_server(self):
+        print("switch")
+        self.pushButton.clicked.connect(self.socket_server)
+        self.pushButton_2.clicked.connect(self.server_send_data)
+
+    def socket_connect(self): #连接按钮绑定函数，建立socket连接
+        QCoreApplication.processEvents();
+        try:
+            self.socket_client = Socket_Client(self.lineEdit_3.text(),int(self.lineEdit_4.text()))
+            self.socket_client.client_socket()
+            self.setWindowTitle("聊天程序1.0 连接成功")
+            self.thread_1 = Thread_recv(self.socket_client,self.textEdit_2)
+            self.thread_1.start()
+        except Exception as e:
+            print(e)
+            print("error")
+            self.setWindowTitle("聊天程序1.0 连接失败")
+
+    def socket_server(self):  #服务端函数
+        QCoreApplication.processEvents();
+        try:
+            self.server_socket = Socket_Client(self.lineEdit_3.text(),int(self.lineEdit_4.text()))
+            self.server_socket.server_socket()
+            self.setWindowTitle("聊天程序1.0 服务开启成功")
+            self.thread_2 = Thread_sev(self.server_socket,self.textEdit_2)
+            self.thread_2.start()
+        except Exception as e:
+            print(e)
+            self.setWindowTitle("聊天程序1.0 服务开启失败")
+
+    def send_message(self):#发送消息
+
+        try:
+            self.socket_client.send_data(self.textEdit.toPlainText())
+            localtime = time.strftime("%H:%M:%S")
+            self.textEdit_2.append(f"[{localtime}]:"+"发送成功!")
+            self.textEdit_2.append(f"[{localtime}]:" + "我说:" + self.textEdit.toPlainText() )
+            self.textEdit.clear()
+            self.textEdit.moveCursor(QTextCursor.End)
+        except Exception as e:
+            print(e)
+
+    def server_send_data(self):
+        try:
+            self.server_socket.server_send_data(self.textEdit.toPlainText())
+            localtime = time.strftime("%H:%M:%S")
+            self.textEdit_2.append(f"[{localtime}]:" + "发送成功!")
+            self.textEdit_2.append(f"[{localtime}]:" + "我说:" + self.textEdit.toPlainText())
+            self.textEdit.clear()
+            self.textEdit.moveCursor(QTextCursor.End)
+        except Exception as e:
+            print(e)
+
+class Thread_recv(QThread):
+    def __init__(self, recv,text_edit):
         super().__init__()
-        self.initUI()
+        self.recv = recv
+        self.text_edit = text_edit
 
-    def initUI(self):
-        self.resize(600, 600)
-        self.setWindowTitle('Chat')
+    def run(self):
+        while True:
+            self.recv_data = self.recv.recv_data()
+            print(self.recv_data)
+            localtime = time.strftime("%H:%M:%S")
+            self.text_edit.append( f"[{localtime}]:" +"对方说:"+ self.recv_data)
 
-        self.main_layout = QVBoxLayout()
-        self.setLayout(self.main_layout)
+class Thread_sev(QThread):
+    def __init__(self,server_socket,text_edit):
+        super().__init__()
+        self.server = server_socket
+        self.text = text_edit
 
-        # 图片
-        self.label_pic = QLabel()
-        self.label_pic.setFixedSize(150, 150)
-        self.label_pic.setStyleSheet('QLabel{background:white;}')
-        self.main_layout.addWidget(self.label_pic)
+    def run(self):
+        self.server.server_accept()
+        print(self.server.client_ip_port)
+        localtime = time.strftime("%H:%M:%S")
+        self.text.append(f"[{localtime}]:" + f"客户端连接成功:{self.server.client_ip_port[0]}")
+        while True:
+            self.data = str(self.server.client.recv(1024),"gbk")
+            print(self.data)
+            localtime = time.strftime("%H:%M:%S")
+            self.text.append(f"[{localtime}]:" + "对方说:" + self.data)
 
-        # 显示聊天内容
-        self.list_chat = QListWidget()
-        self.main_layout.addWidget(self.list_chat)
+class Socket_Client(object):
+    def __init__(self,ipadress,port):
+        self.ipaddress = ipadress
+        self.port = port
 
-        # 输入框
-        self.edit_chat = QTextEdit()
-        self.main_layout.addWidget(self.edit_chat)
+    @classmethod
+    def get_ip(cls):
+        socket_ip = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            socket_ip.connect(('10.255.255.255', 1))
+            return socket_ip.getsockname()[0]
+        except Exception:
+            return '127.0.0.1'
+        finally:
+            socket_ip.close()
 
-        # 布局
-        self.btn_layout = QHBoxLayout()
-        self.main_layout.addLayout(self.btn_layout)
+    def client_socket(self):
+        self.client_connect = socket.socket(family=-1,type=-1)
+        self.client_connect.connect((self.ipaddress,self.port))
 
-        # 发送按钮
-        self.btn_send = QPushButton('发送')
-        self.btn_send.clicked.connect(self.slot_send)
-        self.btn_layout.addWidget(self.btn_send)
+    def close_socket(self):
+        self.client_connect.close()
 
-        # 选择图片
-        self.btn_select = QPushButton('选择图片')
-        self.btn_select.clicked.connect(self.slot_select_pic)
-        self.btn_layout.addWidget(self.btn_select)
+    def server_socket(self):
+        self.server_connect = socket.socket(family=-1,type=-1)
+        self.server_connect.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+        self.server_connect.bind((self.ipaddress,self.port))
+        self.server_connect.listen(128)
 
-        self.show()
+    def server_accept(self):
+        self.client,self.client_ip_port = self.server_connect.accept()
 
-    # 选择图片
-    def slot_select_pic(self):
-        self.pic_path, _ = QFileDialog.getOpenFileName(self, '选择图片', '', 'Image Files(*.jpg *.png)')
-        jpg = QPixmap(self.pic_path).scaled(self.label_pic.width(), self.label_pic.height())
-        self.label_pic.setPixmap(jpg)
+    def server_send_data(self,data):
+        data = data.encode('gbk')
+        print(data)
+        self.client.send(data)
 
-    # 发送图片
-    def slot_send(self):
-        # 发送文字
-        if self.edit_chat.toPlainText():
-            self.list_chat.addItem(self.edit_chat.toPlainText())
-            self.edit_chat.clear()
+    def send_data(self,data):
+        data = data.encode('gbk')  #进行gbk编码
+        print(data)
+        self.client_connect.send(data)
 
-        # 发送图片
-        if self.pic_path:
-            self.send_pic()
-            self.pic_path = ''
-            self.label_pic.clear()
-            self.label_pic.setStyleSheet('QLabel{background:white;}')
-
-    # 发送图片
-    def send_pic(self):
-        # 打开图片
-        with open(self.pic_path, 'rb') as f:
-            img_data = f.read()
-
-        # 发送图片大小
-        len_str = struct.pack('i', len(img_data))
-        self.sock.send(len_str)
-
-        # 发送图片
-        self.sock.send(img_data)
-
+    def recv_data(self):
+        recv = str(self.client_connect.recv(1024),'gbk') #以gbk方式转码
+        return recv
 
 if __name__ == '__main__':
+
     app = QApplication(sys.argv)
-    chat = Chat()
-    sys.exit(app.exec_())
+    window =   Window()
+    window.setWindowTitle("聊天程序1.0")
+    window.show()
+    sys.exit(app.exec())

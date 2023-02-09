@@ -77,6 +77,7 @@ class Server():
         self.bordCastInfo(text)  # 广播出去
 
 
+
 # 客户端
 class Client():  # 主机默认为本地主机,
     def __init__(self, widget, ip, hostName, port):
@@ -107,6 +108,7 @@ class Client():  # 主机默认为本地主机,
 
     def btnsend(self, text):
         self.sendToServer(text)
+
 
     def closeThread(self):
         self.runflag = False
