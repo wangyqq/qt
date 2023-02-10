@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from threading import Thread
 import socket
 
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QTextDocument
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
@@ -85,7 +85,7 @@ class Ui_MainWindow(object):
 
         self.pushButton_5 = QtWidgets.QPushButton(self.layoutWidget1) # 发送图片
         self.pushButton_5.setObjectName("pushButton_5")
-        self.pushButton.clicked.connect(self.sendimage)
+        self.pushButton_5.clicked.connect(self.sendimage)
         self.horizontalLayout_2.addWidget(self.pushButton_5)
 
 
@@ -121,7 +121,7 @@ class Ui_MainWindow(object):
         self.pic_path, _ = QFileDialog.getOpenFileName(None, '选择图片', '', 'Image Files(*.jpg *.png)')
         jpg = QPixmap(self.pic_path).scaled(self.label.width(), self.label.height())
         self.label.setPixmap(jpg)
-        print(type(self.pic_path))
+        print(self.pic_path)
 
     # 单选按钮切换函数
     def radiobtnChange(self, status):
@@ -149,7 +149,15 @@ class Ui_MainWindow(object):
 
     # 发送图片
     def sendimage(self):
-        pass
+        if self.label:
+            print(self.label)
+            jpg = QPixmap(self.pic_path).scaled(self.label.width() / 2 , self.label.height() / 2)
+            self.textBrowser.document().addResource(QTextDocument.ImageResource, QUrl(self.pic_path), jpg)
+            self.textBrowser.append(self.pc.hostName + ":\n")
+            self.textBrowser.append("<img src='" + self.pic_path + "'/>")
+
+            self.pc.btnsend(self.pic_path)
+            self.label.clear()
 
     # 设定本主机为服务器
     def setServer(self):
