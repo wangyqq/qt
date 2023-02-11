@@ -28,11 +28,14 @@ class Ui_MainWindow(object):
 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
+        MainWindow.setStyleSheet("#MainWindow{border-image:url(./images/3.jpg);}")
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.textBrowser = QtWidgets.QTextBrowser(self.centralwidget)
         self.textBrowser.setGeometry(QtCore.QRect(60, 50, 421, 331))
         self.textBrowser.setObjectName("textBrowser")
+
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit.setGeometry(QtCore.QRect(60, 430, 421, 51))
         self.lineEdit.setText("")
@@ -59,12 +62,14 @@ class Ui_MainWindow(object):
         self.pushButton_4.setObjectName("pushButton_4")
         self.horizontalLayout.addWidget(self.pushButton_4)
         self.pushButton_4.clicked.connect(self.setServer)
+        self.pushButton_4.setStyleSheet("background-color: yellow;")
         # 连接服务器
         self.pushButton_3 = QtWidgets.QPushButton(self.widget)
         self.pushButton_3.setObjectName("pushButton_3")
         self.horizontalLayout.addWidget(self.pushButton_3)
         self.pushButton_3.clicked.connect(self.setClient)
         self.pushButton_3.setEnabled(False)
+        self.pushButton_3.setStyleSheet("background-color: yellow;")
 
         self.layoutWidget1 = QtWidgets.QWidget(self.centralwidget)
         self.layoutWidget1.setGeometry(QtCore.QRect(90, 500, 356, 36))
@@ -77,17 +82,17 @@ class Ui_MainWindow(object):
         self.pushButton.setObjectName("pushButton")
         self.pushButton.clicked.connect(self.sendInfo)
         self.horizontalLayout_2.addWidget(self.pushButton)
-
+        self.pushButton.setStyleSheet("background-color: yellow;")
         self.pushButton_2 = QtWidgets.QPushButton(self.layoutWidget1) # 选择图片
         self.pushButton_2.setObjectName("pushButton_2")
         self.horizontalLayout_2.addWidget(self.pushButton_2)
         self.pushButton_2.clicked.connect(self.select_image)
-
+        self.pushButton_2.setStyleSheet("background-color: yellow;")
         self.pushButton_5 = QtWidgets.QPushButton(self.layoutWidget1) # 发送图片
         self.pushButton_5.setObjectName("pushButton_5")
         self.pushButton_5.clicked.connect(self.sendimage)
         self.horizontalLayout_2.addWidget(self.pushButton_5)
-
+        self.pushButton_5.setStyleSheet("background-color: yellow;")
 
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(490, 70, 291, 191))
@@ -153,9 +158,8 @@ class Ui_MainWindow(object):
             print(self.label)
             jpg = QPixmap(self.pic_path).scaled(self.label.width() / 2 , self.label.height() / 2)
             self.textBrowser.document().addResource(QTextDocument.ImageResource, QUrl(self.pic_path), jpg)
-            self.textBrowser.append(self.pc.hostName + ":\n")
+            self.textBrowser.append(self.pc.hostName)
             self.textBrowser.append("<img src='" + self.pic_path + "'/>")
-
             self.pc.btnsend(self.pic_path)
             self.label.clear()
 

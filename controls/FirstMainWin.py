@@ -16,7 +16,7 @@ class FirstMainWin(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon('../designer/imges/1.jpg'))
+    app.setWindowIcon(QIcon('../聊天工具/images/1.jpg'))
     main = FirstMainWin()
     main.show()
     sys.exit(app.exec_())

@@ -27,7 +27,7 @@ class QLabelDemo(QWidget):
         # 对齐方式，将控件文本居中对其
         label3.setAlignment(Qt.AlignCenter)
         label3.setToolTip('这是图片标签')
-        label3.setPixmap(QPixmap('../designer/imges/2.jpg'))
+        label3.setPixmap(QPixmap('../聊天工具/images/2.jpg'))
 
         label4.setOpenExternalLinks(True) # True:打开浏览器  Flase:调用槽
         label4.setText("<a href='https://www.baidu.com'>百度一下</a>")
