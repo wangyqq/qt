@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>物品完成时间记录</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .form-container, .list-container {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .records-container {
+            max-height: 500px; /* 这里的值取决于你的布局需要 */
+            overflow-y: auto; /* 当内容超过最大高度时显示滚动条 */
+            /* 其余样式保持不变 */
+        }
+
+
+        h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        form > label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type=text], input[type=number], input[type=submit] {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type=submit] {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type=submit]:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed; /* 添加固定表格布局 */
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            overflow: hidden; /* 防止内容溢出 */
+            text-overflow: ellipsis; /* 长内容显示省略号 */
+            white-space: nowrap; /* 阻止文本换行 */
+        }
+
+        th {
+            background-color: #007bff;
+            color: #ffffff;
+            text-align: center; /* 表头居中 */
+        }
+
+        td {
+            text-align: center; /* 单元格文本居中 */
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ff6b81;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+
+        /* 侧边导航栏样式 */
+        .sidebar {
+            width: 150px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background-color: #007bff;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 10px;
+        }
+
+        .nav-item a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-item a:hover, .nav-item a.active {
+            background-color: #0056b3;
+        }
+
+        /* 用于推动内容离开侧边栏的空间 */
+        .content {
+            margin-left: 170px; /* 侧边栏宽度加上一些额外的空间 */
+            padding: 20px;
+        }
+
+        /* 调整.container样式来适应新的布局 */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 0;
+        }
+
+        /* 调整其他元素样式以适应新的布局 */
+        .form-container, .list-container {
+            width: calc(100% - 40px); /* 减去padding的总宽度 */
+            margin: 20px;
+        }
+
+        .table-container {
+            overflow: auto; /* 允许滚动 */
+            max-height: 400px; /* 设置最大高度，确保容器在垂直方向上可滚动 */
+            width: 100%; /* 设置宽度 */
+        }
+
+        th, td {
+            min-width: 120px; /* 调整这个值以满足您的具体需求 */
+        }
+
+
+    </style>
+    <script>
+        function confirmDelete(itemName) {
+            const confirmed = confirm("确定要删除 " + itemName + " 吗？");
+            if (confirmed) {
+                window.location.href = '/delete/' + encodeURIComponent(itemName);
+            }
+        }
+    </script>
+</head>
+<body>
+<!-- 侧边导航栏 -->
+<div class="sidebar">
+    <ul class="nav-list">
+        <li class="nav-item"><a href="#" onclick="showSection('guard-records')">守卫记录</a></li>
+        <li class="nav-item"><a href="#" onclick="showSection('shattered-time')">捡破碎时间</a></li>
+    </ul>
+</div>
+
+<div class="content">
+    <div id="guard-records" class="container view">
+        <div class="form-container">
+            <h2>记录物品完成时间</h2>
+            <form method="post">
+                <label for="item_name">物品编号:</label>
+                <input type="text" id="item_name" name="item_name" required>
+
+                <label for="days">天数:</label>
+                <input type="number" id="days" name="days" min="0" value="0">
+
+                <label for="hours">小时数:</label>
+                <input type="number" id="hours" name="hours" min="0" value="0">
+
+                <label for="minutes">分钟数:</label>
+                <input type="number" id="minutes" name="minutes" min="0" value="0">
+
+                <input type="submit" value="提交">
+            </form>
+        </div>
+        <div class="list-container">
+            <div class="records-container">
+                <h2>物品下一次完成时间列表</h2>
+                <table>
+                    <tr>
+                        <th>物品名称</th>
+                        <th>完成时间</th>
+                        <th>次数</th>
+                    </tr>
+                    {% for item_name, values in records.items
+                    () %}
+                    <tr>
+                        <td>{{ item_name }}</td>
+                        <td>{{ values[0] }}</td>
+                        <td>{{ values[1] }}</td>
+                        <td>
+                            <!-- 删除按钮 -->
+                            <button onclick="confirmDelete('{{ item_name }}')">删除</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <!-- 添加刷新列表链接 -->
+            <a href="/" style="margin-top: 20px; display: block; text-align: center;">刷新列表</a>
+        </div>
+    </div>
+
+    <!-- 捡破碎时间视图 -->
+    <div id="shattered-time" class="container view" style="display: none;">
+        <div class="form-container">
+            <h2>捡破碎时间</h2>
+            <form id="cookie-form">
+                <label for="cookie-input">Cookie:</label>
+                <input type="text" id="cookie-input" name="cookie" placeholder="请输入cookie">
+                <button type="submit">更新 Cookie</button>
+            </form>
+            <button onclick="runShatteredTime()">运行</button>
+            <div id="table-container" class="table-container"></div>
+        </div>
+
+        <!-- 新添加的可滚动表格容器 -->
+        <div class="table-container">
+            <div id="csv-table"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 用于切换显示不同部分的函数
+    function showSection(sectionId) {
+        // 隐藏所有视图
+        document.querySelectorAll('.view').forEach(view => {
+            view.style.display = 'none';
+        });
+        // 显示被选中的视图
+        document.getElementById(sectionId).style.display = 'block';
+        // 更新导航项的激活状态
+        document.querySelectorAll('.nav-item a').forEach(navLink => {
+            if (navLink.getAttribute('onclick').includes(sectionId)) {
+                navLink.classList.add('active');
+            } else {
+                navLink.classList.remove('active');
+            }
+        });
+    }
+
+    function updateTableContainer(csvString) {
+        const csvData = parseCSV(csvString);
+        const table = createTableFromCSV(csvData);
+        const tableContainer = document.getElementById('table-container');
+        tableContainer.innerHTML = ''; // 清除之前的内容
+        tableContainer.appendChild(table); // 将新表格添加到容器中
+    }
+
+    function runShatteredTime() {
+        fetch('/run-shattered-time', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // 这个请求不需要发送数据，因为后端会从文件读取cookie
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const csvData = parseCSV(data.data);
+                    const table = createTableFromCSV(csvData);
+                    const container = document.getElementById('csv-table'); // 修改这里，指向新的容器
+                    container.innerHTML = ''; // 清空之前的内容
+                    container.appendChild(table);
+                } else {
+                    alert(data.message);  // 显示错误信息
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function parseCSV(csvString) {
+        const lines = csvString.split('\n');
+        return lines.map(line => line.split(','));
+    }
+
+    function createTableFromCSV(csvData) {
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.overflow = 'scroll';
+        csvData.forEach((row, rowIndex) => {
+            const tr = document.createElement('tr');
+            row.forEach(cell => {
+                const td = document.createElement(rowIndex === 0 ? 'th' : 'td');
+                td.textContent = cell;
+                tr.appendChild(td);
+            });
+            table.appendChild(tr);
+        });
+        return table;
+    }
+
+
+    document.getElementById('cookie-form').onsubmit = function (e) {
+        e.preventDefault();
+        var cookieValue = document.getElementById('cookie-input').value;
+        if (cookieValue) {
+            // 发送 POST 请求更新 cookie
+            fetch('/shattered-time', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({cookie: cookieValue})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const csvData = parseCSV(data.data);
+                        const table = createTableFromCSV(csvData);
+                        const container = document.getElementById('file-content');
+                        container.innerHTML = ''; // 清空之前的内容
+                        container.appendChild(table);
+                    } else {
+                        alert(data.message);  // 显示错误信息，比如"cookie失效"
+                    }
+                })
+
+        }
+    };
+</script>
+</body>
+</html>
